@@ -7,6 +7,10 @@ _bookdown_files
 rsconnect
 .DS_Store
 *.log
+*_cache
+*_files
+*.html
+*.pdf 
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
