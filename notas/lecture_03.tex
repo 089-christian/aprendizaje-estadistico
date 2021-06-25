@@ -1,0 +1,99 @@
+\documentclass[11pt,reqno,twoside]{article}
+%>>>>>>> RENAME CURRENT FILE TO MATCH LECTURE NUMBER
+% E.g., "lecture_01.tex"
+
+%>>>>>>> DO NOT EDIT MACRO FILE
+\input{macro} % "macro.tex" must be in the same folder
+
+%>>>>>>> IF NEEDED, ADD A NEW FILE WITH YOUR OWN MACROS
+
+% \input{lecture_01_macro.tex} % Name of supplemental macros should match lecture number
+
+%>>>>>>> LECTURE NUMBER AND TITLE
+\title{Clase 03:               % UPDATE LECTURE NUMBER
+    Condiciones para evitar el sobreajuste}	% UPDATE TITLE
+% TIP:  Use "\\" to break the title into more than one line.
+
+%>>>>>>> DATE OF LECTURE
+\date{Enero 21, 2021} % Hard-code lecture date. Don't use "\today"
+
+%>>>>>>> NAME OF SCRIBE(S)
+\author{%
+  Responsable:&
+  Christian Rodríguez Uribe  % >>>>> SCRIBE NAME(S)
+}
+
+\begin{document}
+\maketitle %  LEAVE HERE
+% The command above causes the title to be displayed.
+
+%>>>>> DELETE ALL CONTENT UNTIL "\end{document}"
+% This is the body of your document.
+
+Habíamos dicho que existía un $h^*$ que minimizaba el ERM. 
+¿Como se ve este punto con respecto a la densidad de donde vienen los puntos y la función etiquetadora?
+Hay un cuestión: minimizar el ERM no implica minimizar el error "teórico". La siguiente figura explica un poco lo que sucede:
+
+    \begin{figure}[h!]
+      \centering
+      \includegraphics[width=1\columnwidth]{digarama1.JPG}
+      \caption{{\textsf{Idea general de lo que ocurre entre el minimizador teórico, el minimizador de ERM y el conjunto de clasificadores.}}}\label{fig:bell-curve}
+    \end{figure}
+
+En la imagen anterior se muestran los conjuntos de nivel de $L_S(h)$ y de $L_{D, f}(h)$. Se puede ver que los mínimos de ambos errores no corresponden a la misma $h$, entonces lo que se hace es restringir a un conjunto de clasificadores que permita encontrar una $h_H^*$ que 
+se aproxime bastante a las $h$'s de los otros errores.  
+
+\subsection*{2.3.1 $H$ es una familia de funciones finita}
+
+La idea de restringir la búsqueda de $h$ sujeta a $H$ es que el $ERM_H$ no sobreajuste. En este sentido, si $H$ es un conjunto grande, entonces S también es un conjunto grande. 
+
+Hipótesis de realizabilidad: $\exists h^* \in H$ tal que $L_{D, f}(h^*) = 0$
+
+Esto implica que, con probabilidad 1, $L_S(h^*) = 0$ y a su vez que $L_S(h_S) = 0$
+
+Para evaluar que nuestro conjunto de entrenamiento es bueno debemos fijarnos en que tanto se parece a D. Entonces hay que revisar que S sea conformado de muestras aleatoria simples.
+
+Como $x^{(i)} \sim D$, entonces $S \sim D^m$.
+
+Veamos que $L_{D.f}(h_S)$ es una variable aleatoria, pues las observaciones S son generadas de manera aleatoria.  
+
+Denotemos por $\delta$ a la probabilidad de obtener una muestra poco representativa de D. Entonces $1 - \delta$ representa la confianza en la precisión de la muestra.
+
+Ahora consideremos $\epsilon$ como la probabilidad de encontrar errores en el etiquetado. Lo que queremos es que $L_{D, f}(h_S) \leq \epsilon$, pues de esta manera aseguramos que nuestro modelo de clasificación va a tener un error menor que la precisión que hay en los datos. Esto es, queremos un clasificador que sea al menos capaz de clasificar con precisión $\epsilon$. Un clasificador que cumpla con esta propiedad lo llamamos que es aproximadamente correcto. 
+
+En resumen, queremos generar una cota para $D^m(\{S:L_{D,f}(h_S)>\epsilon\})$. Es decir, una cota para la probabilidad de $L_{D,f}(h_S)>\epsilon$. Construyámosla.
+
+Sean $H_B$ las hipótesis erróneas y $M$ las muestra engañosas. Es decir, \\$H_B = \{h \in H : L_{D, f}(h) > \epsilon\}$ y $M = \{S: \exists h \in H, L_S(h) = 0\}$
+
+Hipotesis de realizabilidad $\Rightarrow L_S(h_S) = 0$. Si $\exists h \in H_B$ tal que $L_S(h) = 0$ y $S \in M \Rightarrow \{S: L_{D, f}(h_S)>\epsilon\} \subseteq M = \bigcup_{h \in H_B}\{S: L_S(h) = 0\}$. De esta manera tenemos que $D^m(\{S:L_{D,f}(h_S)>\epsilon\}) \leq D^m(M)$. 
+
+Por un lado:
+
+\begin{equation}
+    D^m(\bigcup_{h \in H_B}\{S: L_S(h) = 0\}) \leq \sum_{h \in H_B}D^m(\{S: L_S(h) = 0\})
+\end{equation}
+
+Por otro lado tenemos que $L_S(h) = 0 \Leftrightarrow h(x^{(i)}) = f(x^{(i)}),  \forall i = 1, ..., m$, entonces $D^m(\{S:L_{S}(h) = 0\}) = \prod_{i = 1}^{m}D(\{x_i: h(x^{(i)}) = f(x^{(i)})\})$. 
+
+Ahora veamos que:
+
+\begin{equation}
+    D(\{x_i: h(x^{(i)}) = f(x^{(i)})\}) = 1 - L_{D,f}(h) \leq 1 - \epsilon
+\end{equation}
+
+Juntando todo lo anterior, tenemos que:
+
+\begin{equation}
+     D^m(\{S:L_{S}(h) = 0\}) \leq (1- \epsilon)^m \leq e^{-\epsilon m}
+\end{equation}
+
+Ahora, como tenemos que $|H| < \infty$ y $H_B \subseteq H$, entonces $D^m(\{S:L_{D, f}(h_S) >\epsilon\}) \leq |H_B|e ^{-\epsilon m} \leq |H|e^{-\epsilon m}$
+
+\begin{corollary}
+    Sea $H$ una clase finita de hipótesis. Sea $\delta \in (0, 1)$ y $\epsilon > 0$ y sea $m \geq \frac{log(\frac{|H|}{\delta})}{\epsilon}$. Entonces $\forall f$ y distribución $D$, para los cuales se cumple la hipótesis de realizabilidad, tenemos con probabilidad de al menos $1 - \delta$ que toda solución de ERM satisface que $L_{D, f}(h_S) \leq \epsilon$ 
+\end{corollary}
+
+Entonces, si $m$ es suficientemente grande, una clase de hipótesis que sea finita será probablemente $(1 - \delta)$ y aproximadamente (hasta un error $\epsilon$) correcta.  
+
+
+\end{document}
